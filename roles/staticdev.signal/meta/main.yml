@@ -1,0 +1,35 @@
+---
+galaxy_info:
+  author: staticdev
+  role_name: signal
+  description: Ansible role to install Signal messenger.
+
+  license: MIT
+
+  min_ansible_version: "2.11"
+
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - buster
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+        - focal
+        - groovy
+
+  galaxy_tags:
+    - signal
+    - chat
+    - communications
+    - messenger
+    - privacy
+    - desktop
+    - encryption
+    - im
+    - secure
+    - workstation
+
+dependencies: []

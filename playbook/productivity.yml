@@ -1,0 +1,6 @@
+- hosts: localhost
+  roles:
+    - laptop-productivity
+    - staticdev.signal
+    - geerlingguy.docker
+

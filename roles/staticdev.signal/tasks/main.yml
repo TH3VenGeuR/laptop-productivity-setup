@@ -1,0 +1,29 @@
+---
+- name: Check if keyring exists
+  ansible.builtin.stat:
+    path: /usr/share/keyrings/signal-desktop-keyring.gpg
+  register: keyring_file
+
+- name: Keyring setup
+  ansible.builtin.include_tasks: keyring-setup.yml
+  when: not keyring_file.stat.exists
+
+- name: Add Signal repository to list of repositories
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop-keyring.gpg] https://updates.signal.org/desktop/apt xenial main' |\
+      sudo tee -a /etc/apt/sources.list.d/signal-xenial.list
+  args:
+    creates: /etc/apt/sources.list.d/signal-xenial.list
+    executable: /bin/bash
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+
+- name: Install Signal
+  ansible.builtin.apt:
+    name: signal-desktop
+    state: present
+  become: true

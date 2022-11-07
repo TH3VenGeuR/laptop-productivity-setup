@@ -1,0 +1,57 @@
+- name: Get vscode Deb
+  get_url:
+    url: https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
+    dest: /tmp/vscode.deb
+
+- name: Get MS Teams Deb
+  get_url:
+    url: https://go.microsoft.com/fwlink/p/?LinkID=2112886&clcid=0x40c&culture=fr-fr&country=FR    
+    dest: /tmp/msteams.deb
+
+- name: Get Bitwarden Deb
+  get_url:
+    url: https://github.com/bitwarden/clients/releases/download/desktop-v2022.10.1/Bitwarden-2022.10.1-amd64.deb
+    dest: /tmp/bitwarden.deb
+
+- name: Install all previous debs 
+  apt:
+    deb: /tmp/{{ item }}.deb
+  with_items:
+    - vscode
+    - msteams
+    - bitwarden
+
+- name: verify if vpn already installed
+  stat:
+    path: /opt/cisco/anyconnect/bin/vpnagentd
+  register: vpn
+
+- name: Creacte extract cisco dir
+  file:
+    path: /tmp/anyconnect-linux64-4.10.03104
+    state: directory
+    mode: '0755'
+  when: vpn.stat.exists is undefined
+
+- name: Get Cisco anyconnect tar 
+  unarchive:
+    src: ~/Downloads/anyconnect-linux64-4.10.03104-predeploy-k9.tar.gz
+    dest: /tmp/anyconnect-linux64-4.10.03104/
+    remote_src: yes
+  when: vpn.stat.exists is undefined
+
+- name: Run Cisco install script
+  script: /tmp/anyconnect-linux64-4.10.03104/anyconnect-linux64-4.10.03104/vpn/vpn_install.sh
+  when: vpn.stat.exists is undefined
+
+- name: Install various packages
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - tilix
+    - keepassxc
+    - flameshot
+    - tzdata
+    - gnome-tweaks
+    - gnome-shell-extension-manager
+

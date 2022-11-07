@@ -1,0 +1,22 @@
+---
+- name: Create temporary dir
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: signal_keys
+  register: tmp_dir
+
+- name: Get keys file
+  ansible.builtin.get_url:
+    url: https://updates.signal.org/desktop/apt/keys.asc
+    dest: "{{ tmp_dir.path }}/keys.asc"
+    mode: "0644"
+
+- name: Install Signal official public software signing key
+  ansible.builtin.shell: |
+    set -o pipefail
+    cat {{ tmp_dir.path }}/keys.asc | gpg --dearmor > {{ tmp_dir.path }}/signal-desktop-keyring.gpg
+    cat {{ tmp_dir.path }}/signal-desktop-keyring.gpg | sudo tee -a /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null
+  args:
+    creates: /usr/share/keyrings/signal-desktop-keyring.gpg
+    executable: /bin/bash
+  become: true
