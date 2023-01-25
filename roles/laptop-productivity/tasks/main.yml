@@ -82,6 +82,13 @@
     dest: {{ homedir }}/.config/systemd/user/fakecam.service
     mode: '0644'
 
+- name: Change wordir in service 
+  replace:
+    path: {{ homedir }}/.config/systemd/user/fakecam.service
+    regexp: 'WorkingDirectory=%h/devel/fangfufu/Linux-Fake-Background-Webcam'
+    replace: 'WorkingDirectory=/opt/Linux-Fake-Background-Webcam'
+    backup: yes
+
 - name: Run the user service 
   systemd:
     name: fakecam
