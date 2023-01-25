@@ -35,7 +35,7 @@
 
 - name: Get Cisco anyconnect tar 
   unarchive:
-    src: ~/Downloads/anyconnect-linux64-4.10.03104-predeploy-k9.tar.gz
+    src: https://its.gmu.edu/wp-content/uploads/anyconnect-linux64-4.10.03104-predeploy-k9.tar.gz 
     dest: /tmp/anyconnect-linux64-4.10.03104/
     remote_src: yes
   when: vpn.stat.exists is undefined
@@ -43,6 +43,17 @@
 - name: Run Cisco install script
   script: /tmp/anyconnect-linux64-4.10.03104/anyconnect-linux64-4.10.03104/vpn/vpn_install.sh
   when: vpn.stat.exists is undefined
+
+- name: Get users homedir
+  local_action: command echo ~
+  register: homedir
+
+- name: Get noisetorch tar 
+  unarchive:
+    src: https://github.com/noisetorch/NoiseTorch/releases/download/v0.12.2/NoiseTorch_x64_v0.12.2.tgz 
+    dest: {{ homedir }} 
+    remote_src: yes
+
 
 - name: Install various packages
   apt:
@@ -54,4 +65,27 @@
     - tzdata
     - gnome-tweaks
     - gnome-shell-extension-manager
+    - v4l2loopback-dkms
+
+- name: Get Linux-Fake-Background-Webcam from github
+    repo: https://github.com/fangfufu/Linux-Fake-Background-Webcam.git
+    dest: /opt/ 
+    single_branch: yes
+    version: master  
+
+- name: Run fakebackground install script
+  script: /opt/Linux-Fake-Background-Webcam/install.sh
+
+- name: Copy systemd file with owner and permissions
+  copy:
+    src:  /opt/Linux-Fake-Background-Webcam/systemd-user/fakecam.service
+    dest: {{ homedir }}/.config/systemd/user/fakecam.service
+    mode: '0644'
+
+- name: Run the user service 
+  systemd:
+    name: fakecam
+    state: started
+    enabled: yes
+    scope: user
 
